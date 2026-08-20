@@ -3,9 +3,17 @@
 #include <string>
 #include <limits>
 #include <iomanip>
-#include<algorithm>
+#include <algorithm>
 
 using namespace std;
+
+struct Expense
+{
+    string name;
+    double amount;
+    int paidBy;
+    vector<int> participants;
+};
 
 int main()
 {
@@ -14,6 +22,7 @@ int main()
 
     vector<string> members;
     vector<double> balances;
+    vector<Expense> expenses;
 
     do
     {
@@ -51,6 +60,7 @@ int main()
 
             members.clear();
             balances.assign(numberOfMembers, 0.0);
+            expenses.clear();
 
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
@@ -75,67 +85,116 @@ int main()
         }
 
         // Option 2: Add an expense
-        else if (choice == 2)
-        {
-            if (members.empty())
-            {
+        else if (choice == 2){
+            if (members.empty()){
                 cout << "\nPlease create a group first.\n";
             }
-            else
-            {
-                string expenseName;
-                double amount;
-                int payer;
+            else{
+            string expenseName;
+            double amount;
+            int payer;
+            int numberOfParticipants;
+            vector<int> participants;
 
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-                cout << "\nEnter expense name: ";
-                getline(cin, expenseName);
+            cout << "\nEnter expense name: ";
+            getline(cin, expenseName);
 
-                cout << "Enter expense amount: ";
-                cin >> amount;
+            cout << "Enter expense amount: ";
+            cin >> amount;
 
-                if (amount <= 0)
-                {
-                    cout << "The expense amount must be greater than zero.\n";
-                    continue;
-                }
-
-                cout << "\nWho paid for this expense?\n";
-
-                for (int i = 0; i < members.size(); i++)
-                {
-                    cout << i + 1 << ". " << members[i] << "\n";
-                }
-
-                cout << "Enter member number: ";
-                cin >> payer;
-
-                if (payer < 1 || payer > members.size())
-                {
-                    cout << "Invalid member number.\n";
-                    continue;
-                }
-
-                double share = amount / members.size();
-
-                // Every member owes their share
-                for (int i = 0; i < balances.size(); i++)
-                {
-                    balances[i] -= share;
-                }
-
-                // The payer should receive the amount they paid
-                balances[payer - 1] += amount;
-
-                cout << fixed << setprecision(3);
-                cout << "\nExpense added successfully!\n";
-                cout << "Expense: " << expenseName << "\n";
-                cout << "Amount: " << amount << " OMR\n";
-                cout << "Paid by: " << members[payer - 1] << "\n";
-                cout << "Share per person: " << share << " OMR\n";
+            if (amount <= 0){
+                cout << "The expense amount must be greater than zero.\n";
+                continue;
             }
+
+            cout << "\nMembers:\n";
+
+            for (int i = 0; i < members.size(); i++){
+                cout << i + 1 << ". " << members[i] << "\n";
+            }
+
+            cout << "\nWho paid? Enter member number: ";
+            cin >> payer;
+
+            if (payer < 1 || payer > members.size()){
+                cout << "Invalid member number.\n";
+                continue;
+            }
+
+            cout << "How many members participated in this expense? ";
+            cin >> numberOfParticipants;
+
+            if (numberOfParticipants < 1 ||
+            numberOfParticipants > members.size()){
+                cout << "Invalid number of participants.\n";
+                continue;
+            }
+
+            cout << "Enter the participant numbers:\n";
+
+            for (int i = 0; i < numberOfParticipants; i++){
+                int participant;
+
+                cout << "Participant " << i + 1 << ": ";
+                cin >> participant;
+
+                if (participant < 1 || participant > members.size()){
+                    cout << "Invalid member number. Try again.\n";
+                    i--;
+                    continue;
+                }
+
+                int participantIndex = participant - 1;
+
+                if (find(participants.begin(),
+                         participants.end(),
+                         participantIndex) != participants.end()){
+                    cout << "This member was already selected. Try again.\n";
+                    i--;
+                    continue;
+                }
+
+                participants.push_back(participantIndex);
+            }
+
+            double share = amount / participants.size();
+
+            // Only selected participants owe a share
+            for (int participantIndex : participants){
+                balances[participantIndex] -= share;
+            }
+
+            // The payer should receive the amount they paid
+            balances[payer - 1] += amount;
+
+            // Save the expense details
+            Expense newExpense;
+
+            newExpense.name = expenseName;
+            newExpense.amount = amount;
+            newExpense.paidBy = payer - 1;
+            newExpense.participants = participants;
+
+            expenses.push_back(newExpense);
+
+            cout << fixed << setprecision(3);
+            cout << "\nExpense added successfully!\n";
+            cout << "Expense: " << expenseName << "\n";
+            cout << "Amount: " << amount << " OMR\n";
+            cout << "Paid by: " << members[payer - 1] << "\n";
+            cout << "Share per participant: " << share << " OMR\n";
+
+            cout << "Participants: ";
+
+            for (int participantIndex : participants){
+                cout << members[participantIndex] << " ";
+            }
+
+            cout << "\n";
         }
+    }
 
         // Option 3: View balances
         else if (choice == 3)
