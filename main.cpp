@@ -34,7 +34,8 @@ int main()
         cout << "2. Add an expense\n";
         cout << "3. View balances\n";
         cout << "4. Settle debts\n";
-        cout << "5. Exit\n";
+        cout << "5. View expense history\n";
+        cout << "6. Exit\n";
 
         cout << "\nEnter your choice: ";
         cin >> choice;
@@ -292,9 +293,44 @@ int main()
                 }
             }
         }
+        // Option 5: View expense history
+        else if (choice == 5){
+            if (expenses.empty()){
+               cout << "\nNo expenses have been added yet.\n";
+           }
+           else{
+               cout << fixed << setprecision(3);
+               cout << "\nExpense history for " << groupName << ":\n";
 
-        // Option 5: Exit
-        else if (choice == 5)
+               for (int i = 0; i < expenses.size(); i++){
+                   cout << "\nExpense " << i + 1 << ":\n";
+                   cout << "Name: " << expenses[i].name << "\n";
+                   cout << "Amount: " << expenses[i].amount << " OMR\n";
+
+                   cout << "Paid by: "
+                        << members[expenses[i].paidBy]
+                        << "\n";
+
+                    cout << "Participants: ";
+                   for (int participantIndex : expenses[i].participants){
+                       cout << members[participantIndex] << " ";
+                   }
+
+                   cout << "\n";
+
+                   double share =
+                       expenses[i].amount /
+                       expenses[i].participants.size();
+
+                   cout << "Share per participant: "
+                        << share
+                        << " OMR\n";
+                }
+            }
+        }
+
+        // Option 6: Exit
+        else if (choice == 6)
         {
             cout << "\nThank you for using SplitMate!\n";
         }
@@ -302,10 +338,10 @@ int main()
         // Invalid menu option
         else
         {
-            cout << "\nInvalid choice. Please select from 1 to 5.\n";
+            cout << "\nInvalid choice. Please select from 1 to 6.\n";
         }
 
-    } while (choice != 5);
+    } while (choice != 6);
 
     return 0;
 }
